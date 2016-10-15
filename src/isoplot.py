@@ -31,7 +31,12 @@ def get_functions(mod):
     import inspect
 
     all_functions = inspect.getmembers(mod, inspect.isfunction)
-    return all_functions
+
+    f_dict = {}
+    for (fname, f) in all_functions:
+        f_dict[fname] = f
+    
+    return f_dict
 
 def unload_module(path):
     pass
@@ -47,7 +52,9 @@ if __name__=="__main__":
     print("Hello.")
 
     mod = load_module("./default_plots.py")
-    f_list = get_functions(mod)
-    
-    print f_list
+    f_dict = get_functions(mod)
+
+    print f_dict
+    f_dict['scatter'](None, None)
+    f_dict['line'](None, None)
     
