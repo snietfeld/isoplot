@@ -43,7 +43,6 @@ def load_module(path):
     mod_name = base_name.split('.')[0]
 
     print("Full path: %s" % full_path)
-    print("Base name: %s" % base_name)
     print("Module name: %s" % mod_name)
     
     mod = imp.load_source(base_name, full_path)
@@ -71,6 +70,10 @@ def run_usr_function(mod_name, fcn_name):
 if __name__=="__main__":
     print("Hello.")
 
+    #
+    # CONFIG
+    #----------------------------------------------------------------------
+    print("\n\n#\n# CONFIG\n#" + "-"*70)
     # If config file doesn't exist yet, create default
     if not os.path.isfile(config_path):
         print("Creating default config file at %s" % config_path)
@@ -82,7 +85,33 @@ if __name__=="__main__":
     # Load config file
     print("Loading config file at %s" % config_path)
     config = load_config(config_path)
+    print config
 
+    
+    #
+    # LOAD
+    #----------------------------------------------------------------------
+    print("\n\n#\n# LOAD\n#" + "-"*70)
+    # Load data load modules
+    mod_dict = {}
+    for mod_path in config['loadmod_paths']:
+        (mod_name, mod) = load_module(mod_path)
+        mod_dict[mod_name] = mod
+
+    # Make dict that maps (mod_name, f_name) --> function handle
+    load_map = {}
+    for mod_name in mod_dict.keys():
+        f_dict = get_functions(mod)
+
+        for f_name in f_dict.keys():
+            load_map[(mod_name, f_name)] = f_dict[f_name]
+        print load_map.keys()
+
+        
+    #
+    # PLOT
+    #----------------------------------------------------------------------
+    print("\n\n#\n# PLOT\n#" + "-"*70)
     # Load plotting modules
     mod_dict = {}
     for mod_path in config['plotmod_paths']:
@@ -90,19 +119,26 @@ if __name__=="__main__":
         mod_dict[mod_name] = mod
 
     # Make dict that maps (mod_name, f_name) --> function handle
-    f_map = {}
+    plot_map = {}
     for mod_name in mod_dict.keys():
         f_dict = get_functions(mod)
 
         for f_name in f_dict.keys():
-            f_map[(mod_name, f_name)] = f_dict[f_name]
-        print f_map.keys()
-
-    print f_map
-    f_map[('default_plotmod','scatter')](None, None)
-    f_map[('default_plotmod','line')](None, None)
+            plot_map[(mod_name, f_name)] = f_dict[f_name]
+        print plot_map.keys()
 
 
-    # Load data import module
+    
+    #
+    # RUN
+    #----------------------------------------------------------------------
+    data = load_map[('default_loadmod', 'load_data_file')]('./test.csv')
+    print data
+    
+    print("\n\n#\n# RUN\n#" + "-"*70)
+    plot_map[('default_plotmod','scatter')](None, None)
+    plot_map[('default_plotmod','line')](None, None)
+
+
     
     
