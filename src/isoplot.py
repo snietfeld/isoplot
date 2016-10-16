@@ -20,7 +20,8 @@ import pickle
 config_path = "./config.pkl"
 
 def create_new_config():
-    config = {'mod_paths': [],
+    config = {'plotmod_paths': [],
+              'loadmod_paths': [],
               'default_data_dir': os.path.abspath('./')}
     return config
 
@@ -39,7 +40,7 @@ def load_module(path):
     print("Loading module from %s" % path)
     full_path = os.path.abspath(path)
     base_name = os.path.basename(full_path)
-    mod_name= base_name.split('.')[0]
+    mod_name = base_name.split('.')[0]
 
     print("Full path: %s" % full_path)
     print("Base name: %s" % base_name)
@@ -62,10 +63,8 @@ def get_functions(mod):
 def unload_module(path):
     pass
 
-def load_data_file(path):
-    pass
 
-def run_usr_function(f_name):
+def run_usr_function(mod_name, fcn_name):
     pass
 
 
@@ -76,7 +75,8 @@ if __name__=="__main__":
     if not os.path.isfile(config_path):
         print("Creating default config file at %s" % config_path)
         config = create_new_config()
-        config['mod_paths'].append( os.path.abspath("./default_plots.py") )
+        config['plotmod_paths'].append( os.path.abspath("./default_plotmod.py") )
+        config['loadmod_paths'].append( os.path.abspath("./default_loadmod.py") )
         save_config(config, config_path)
 
     # Load config file
@@ -85,7 +85,7 @@ if __name__=="__main__":
 
     # Load plotting modules
     mod_dict = {}
-    for mod_path in config['mod_paths']:
+    for mod_path in config['plotmod_paths']:
         (mod_name, mod) = load_module(mod_path)
         mod_dict[mod_name] = mod
 
@@ -99,6 +99,10 @@ if __name__=="__main__":
         print f_map.keys()
 
     print f_map
-    f_map[('default_plots','scatter')](None, None)
-    f_map[('default_plots','line')](None, None)
+    f_map[('default_plotmod','scatter')](None, None)
+    f_map[('default_plotmod','line')](None, None)
+
+
+    # Load data import module
+    
     
