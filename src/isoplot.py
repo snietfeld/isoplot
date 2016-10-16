@@ -54,8 +54,8 @@ def get_functions(mod):
     all_functions = inspect.getmembers(mod, inspect.isfunction)
 
     f_dict = {}
-    for (fname, f) in all_functions:
-        f_dict[fname] = f
+    for (f_name, f) in all_functions:
+        f_dict[f_name] = f
     
     return f_dict
 
@@ -84,12 +84,21 @@ if __name__=="__main__":
     config = load_config(config_path)
 
     # Load plotting modules
+    mod_dict = {}
     for mod_path in config['mod_paths']:
         (mod_name, mod) = load_module(mod_path)
-        f_dict = get_functions(mod)
-        print f_dict.keys()
+        mod_dict[mod_name] = mod
 
-    print f_dict
-    f_dict['scatter'](None, None)
-    f_dict['line'](None, None)
+    # Make dict that maps (mod_name, f_name) --> function handle
+    f_map = {}
+    for mod_name in mod_dict.keys():
+        f_dict = get_functions(mod)
+
+        for f_name in f_dict.keys():
+            f_map[(mod_name, f_name)] = f_dict[f_name]
+        print f_map.keys()
+
+    print f_map
+    f_map[('default_plots','scatter')](None, None)
+    f_map[('default_plots','line')](None, None)
     
