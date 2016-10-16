@@ -27,11 +27,17 @@
      <item>
       <widget class="QGroupBox" name="groupBox_2">
        <property name="title">
-        <string>Functions</string>
+        <string>Plot Functions</string>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
-         <widget class="QTreeView" name="treeView_2"/>
+         <widget class="QTreeWidget" name="plot_treeWidget">
+          <column>
+           <property name="text">
+            <string notr="true">1</string>
+           </property>
+          </column>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -62,7 +68,13 @@
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
-         <widget class="QTreeView" name="treeView"/>
+         <widget class="QTreeWidget" name="data_treeWidget">
+          <column>
+           <property name="text">
+            <string notr="true">1</string>
+           </property>
+          </column>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -105,7 +117,6 @@
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionOpen_Data_File"/>
    </widget>
    <widget class="QMenu" name="menuSettings">
     <property name="title">

@@ -6,10 +6,15 @@
 
 import os
 import csv
+from PyQt4 import QtCore, QtGui
 
-def load_data_file(path):
-    full_path = os.path.abspath(path)
-    base_name = os.path.basename(full_path)
+def load_data_file(path=None):
+    if path is None:
+        path = str( QtGui.QFileDialog.getOpenFileName(None,
+                                                      "Open Data File", "",
+                                                      "CSV data files (*.csv)") )
+
+    base_name = os.path.basename(path)
     (mod_name, ext) = base_name.split('.')
 
     if ext == "csv":
@@ -22,10 +27,13 @@ def load_data_file(path):
 #--------------------------------------------------------------------------------
 
 # Will create a dict with column header --> list of strings
-def load_data_from_csv(path, floatify=True):
-    full_path = os.path.abspath(path)
-    
-    reader = csv.DictReader(open(full_path))
+def load_data_from_csv(path=None, floatify=True):
+    if path is None:
+        path = str( QtGui.QFileDialog.getOpenFileName(None,
+                                                      "Open Data File", "",
+                                                      "CSV data files (*.csv)") )
+        
+    reader = csv.DictReader(open(path))
 
     result = {}
     for row in reader:

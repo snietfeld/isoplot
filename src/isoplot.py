@@ -17,7 +17,10 @@
 import os
 import pickle
 
-config_path = "./config.pkl"
+import sys
+from PyQt4 import QtCore, QtGui
+from isoplot_gui import Ui_MainWindow
+
 
 def create_new_config():
     config = {'plotmod_paths': [],
@@ -67,7 +70,96 @@ def run_usr_function(mod_name, fcn_name):
     pass
 
 
-if __name__=="__main__":
+class Isoplot_App(QtGui.QMainWindow):
+
+    def __init__(self, parent=None):
+	QtGui.QWidget.__init__(self, parent)
+	self.ui = Ui_MainWindow()
+        self.config_path = os.path.abspath("./config.pkl")
+        self.config = None
+        self.load_map = None
+        self.plot_map = None
+        
+	self.ui.setupUi(self)
+	# here we connect signals with our slots
+	#QtCore.QObject.connect(self.ui.button_open,QtCore.SIGNAL("clicked()"), self.file_dialog)
+        self.load_config(self.config_path)
+        self.import_loadmods()
+        self.import_plotmods()
+
+        self.update_file_menu()
+
+    def load_config(self, path):
+        print("\n\n#\n# CONFIG\n#" + "-"*70)
+        # If config file doesn't exist yet, create default
+        if not os.path.isfile(path):
+            print("Creating default config file at %s" % path)
+            config = create_new_config()
+            config['plotmod_paths'].append( os.path.abspath("./default_plotmod.py") )
+            config['loadmod_paths'].append( os.path.abspath("./default_loadmod.py") )
+            save_config(config, path)
+
+        # Load config file
+        print("Loading config file at %s" % path)
+        config = load_config(path)
+        print config
+        self.config = config
+
+    def import_loadmods(self):
+        print("\n\n#\n# LOAD\n#" + "-"*70)
+        # Load data load modules
+        mod_dict = {}
+        for mod_path in self.config['loadmod_paths']:
+            (mod_name, mod) = load_module(mod_path)
+            mod_dict[mod_name] = mod
+
+        # Make dict that maps (mod_name, f_name) --> function handle
+        load_map = {}
+        for mod_name in mod_dict.keys():
+            f_dict = get_functions(mod)
+    
+            for f_name in f_dict.keys():
+                load_map[(mod_name, f_name)] = f_dict[f_name]
+            print load_map
+        self.load_map = load_map
+
+    def update_file_menu(self):
+        print("\n\n#\n# UPDATE\n#" + "-"*70)
+        self.ui.menuFile.clear()
+
+        #mod_names = list( set([mod_name for (mod_name, mod) in self.load_map.keys()]))
+
+        mod_names = []
+        for (mod_name, fcn_name) in self.load_map.keys():
+            if mod_name not in mod_names:
+                print("Adding %s" % mod_name)
+                mod_menu = self.ui.menuFile.addMenu(mod_name)
+                mod_names.append(mod_name)
+
+            self.ui.menuFile.addMenu( mod_menu)
+            action = mod_menu.addAction(fcn_name)
+            fcn_handle = self.load_map[(mod_name, fcn_name)]
+
+            QtCore.QObject.connect(action,QtCore.SIGNAL("triggered()"), fcn_handle)
+
+        self.ui.menuFile.addSeparator()
+        quit_action = self.ui.menuFile.addAction('Quit')
+        QtCore.QObject.connect(quit_action,QtCore.SIGNAL("triggered()"), self.quit)
+
+    def import_plotmods(self):
+        pass
+
+    def run_loadfun(self):
+        pass
+
+    def run_plotfun(self, mod_name, fcn_name):
+        pass
+
+    def quit(self):
+        print("Quit!")
+
+
+def Test():
     print("Hello.")
 
     #
@@ -140,5 +232,9 @@ if __name__=="__main__":
     plot_map[('default_plotmod','line')](None, None)
 
 
-    
-    
+if __name__=="__main__":
+    # Start GUI
+    app = QtGui.QApplication(sys.argv)
+    myapp = Isoplot_App()
+    myapp.show()
+    sys.exit(app.exec_())
