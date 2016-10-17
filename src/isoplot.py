@@ -79,10 +79,15 @@ class Isoplot_App(QtGui.QMainWindow):
         self.config = None
         self.load_map = None
         self.plot_map = None
+        self.open_datasets = {}
+        self.last_opened_filename = None
         
 	self.ui.setupUi(self)
-	# here we connect signals with our slots
-	#QtCore.QObject.connect(self.ui.button_open,QtCore.SIGNAL("clicked()"), self.file_dialog)
+        
+	# Connect signals to slots
+	QtCore.QObject.connect(self.ui.btn_run_plotfcn, QtCore.SIGNAL("clicked()"),
+                               self.run_plotfcn)
+        
         self.load_config(self.config_path)
         self.import_loadmods()
         self.import_plotmods()
@@ -140,20 +145,82 @@ class Isoplot_App(QtGui.QMainWindow):
             action = mod_menu.addAction(fcn_name)
             fcn_handle = self.load_map[(mod_name, fcn_name)]
 
-            QtCore.QObject.connect(action,QtCore.SIGNAL("triggered()"), fcn_handle)
+            # Now create a lambda that calls the run_loadfcn with right args
+            QtCore.QObject.connect(action,QtCore.SIGNAL("triggered()"),
+                                   lambda : self.run_loadfcn(mod_name, fcn_name))
 
         self.ui.menuFile.addSeparator()
         quit_action = self.ui.menuFile.addAction('Quit')
         QtCore.QObject.connect(quit_action,QtCore.SIGNAL("triggered()"), self.quit)
 
+    def update_data_tree(self):
+        data_tree = self.ui.data_treeWidget
+        data_tree.clear()
+        
+        for data_name in self.open_datasets.keys():
+            
+            parent = QtGui.QTreeWidgetItem(data_tree.invisibleRootItem(), [data_name])
+            parent.setChildIndicatorPolicy(QtGui.QTreeWidgetItem.ShowIndicator)
+            parent.setExpanded (True)
+
+            data = self.open_datasets[data_name]
+            for key in data.keys():
+                item = QtGui.QTreeWidgetItem(parent, [key])
+
+
     def import_plotmods(self):
-        pass
+        print("\n\n#\n# PLOT\n#" + "-"*70)
+        # Load data load modules
+        mod_dict = {}
+        for mod_path in self.config['plotmod_paths']:
+            (mod_name, mod) = load_module(mod_path)
+            mod_dict[mod_name] = mod
 
-    def run_loadfun(self):
-        pass
+        # Make dict that maps (mod_name, f_name) --> function handle
+        plot_map = {}
+        for mod_name in mod_dict.keys():
+            f_dict = get_functions(mod)
+    
+            for f_name in f_dict.keys():
+                plot_map[(mod_name, f_name)] = f_dict[f_name]
+            print plot_map
+        self.plot_map = plot_map
 
-    def run_plotfun(self, mod_name, fcn_name):
-        pass
+        self.update_plot_tree()
+
+    def update_plot_tree(self):
+        data_tree = self.ui.plot_treeWidget
+        data_tree.clear()
+
+        mod_names = []
+        for (mod_name, fcn_name) in self.plot_map.keys():
+            if mod_name not in mod_names:
+                parent = QtGui.QTreeWidgetItem(data_tree.invisibleRootItem(), [mod_name])
+                parent.setChildIndicatorPolicy(QtGui.QTreeWidgetItem.ShowIndicator)
+                parent.setExpanded (True)
+                mod_names.append(mod_name)
+
+            item = QtGui.QTreeWidgetItem(parent, [fcn_name])
+
+    def run_loadfcn(self, mod_name, fcn_name):
+        print("Running %s.%s()" % (mod_name, fcn_name))
+        (filename, data) = self.load_map[(mod_name, fcn_name)]()
+        self.open_datasets[filename] = data
+        self.last_opened_filename = filename
+        print filename, data
+
+        self.update_data_tree()
+
+    def run_plotfcn(self):
+        # Get selected function name and parent mod name
+        current_item = self.ui.plot_treeWidget.currentItem()
+        parent_item = current_item.parent()
+
+        mod_name, fcn_name =  str(parent_item.text(0)), str(current_item.text(0))
+        
+        dataset_filename = self.last_opened_filename
+        dataset = self.open_datasets[dataset_filename]
+        self.plot_map[(mod_name, fcn_name)](dataset_filename, dataset)
 
     def quit(self):
         print("Quit!")

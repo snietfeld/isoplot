@@ -22,7 +22,7 @@ def load_data_file(path=None):
     else:
         print("Error: File type %s not supported." % ext)
 
-    return data
+    return (base_name, data)
 
 #--------------------------------------------------------------------------------
 
@@ -32,6 +32,7 @@ def load_data_from_csv(path=None, floatify=True):
         path = str( QtGui.QFileDialog.getOpenFileName(None,
                                                       "Open Data File", "",
                                                       "CSV data files (*.csv)") )
+    base_name = os.path.basename(path)
         
     reader = csv.DictReader(open(path))
 
@@ -42,7 +43,6 @@ def load_data_from_csv(path=None, floatify=True):
             value = value.strip()
             
             result.setdefault(column, []).append(value)
-
 
             
     def floatify_dict(d):
@@ -58,6 +58,7 @@ def load_data_from_csv(path=None, floatify=True):
             
     if floatify is True:
         result = floatify_dict(result)
-    print result
+        
+    return (base_name, result)
 
 

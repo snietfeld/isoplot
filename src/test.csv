@@ -1,4 +1,5 @@
-Time[s], pos_x, mode
+time_s, pos_x, mode
 0.0, 1.0, START
 0.1, 2.0, RUN
-0.3, 3.0, EXPLODE
+0.3, 3.0, MELT
+0.4, 3.0, EXPLODE

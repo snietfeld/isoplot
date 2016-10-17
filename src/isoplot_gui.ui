@@ -43,7 +43,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="btn_run_plotfcn">
        <property name="text">
         <string>Run</string>
        </property>
