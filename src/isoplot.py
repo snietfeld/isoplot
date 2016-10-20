@@ -87,12 +87,23 @@ class Isoplot_App(QtGui.QMainWindow):
 	# Connect signals to slots
 	QtCore.QObject.connect(self.ui.btn_run_plotfcn, QtCore.SIGNAL("clicked()"),
                                self.run_plotfcn)
+        QtCore.QObject.connect(self.ui.actionAdd_plotting_module, QtCore.SIGNAL("triggered()"),
+                               self.add_plotmod)
+        QtCore.QObject.connect(self.ui.actionAdd_loading_module, QtCore.SIGNAL("triggered()"),
+                               self.add_loadmod)
+        QtCore.QObject.connect(self.ui.actionReset_User_Settings, QtCore.SIGNAL("triggered()"),
+                               self.reset_user_settings)
+        
         
         self.load_config(self.config_path)
         self.import_loadmods()
         self.import_plotmods()
 
-        self.update_file_menu()
+        
+
+    def reset_user_settings(self):
+        self.config = create_new_config()
+        save_config(self.config, self.config_path)
 
     def load_config(self, path):
         print("\n\n#\n# CONFIG\n#" + "-"*70)
@@ -127,6 +138,8 @@ class Isoplot_App(QtGui.QMainWindow):
                 load_map[(mod_name, f_name)] = f_dict[f_name]
             print load_map
         self.load_map = load_map
+
+        self.update_file_menu()
 
     def update_file_menu(self):
         print("\n\n#\n# UPDATE\n#" + "-"*70)
@@ -167,6 +180,25 @@ class Isoplot_App(QtGui.QMainWindow):
             for key in data.keys():
                 item = QtGui.QTreeWidgetItem(parent, [key])
 
+    def add_plotmod(self):
+        path = str( QtGui.QFileDialog.getOpenFileName(None,
+                                                      "Select Plot .py Module", "",
+                                                      "Python Modules (*.py)") )
+
+        self.config['plotmod_paths'].append(path)
+        save_config(self.config, self.config_path)
+        
+        self.import_plotmods()
+
+    def add_loadmod(self):
+        path = str( QtGui.QFileDialog.getOpenFileName(None,
+                                                      "Select Load .py Module", "",
+                                                      "Python Modules (*.py)") )
+
+        self.config['loadmod_paths'].append(path)
+        save_config(self.config, self.config_path)
+        
+        self.import_loadmods()
 
     def import_plotmods(self):
         print("\n\n#\n# PLOT\n#" + "-"*70)
@@ -174,17 +206,23 @@ class Isoplot_App(QtGui.QMainWindow):
         mod_dict = {}
         for mod_path in self.config['plotmod_paths']:
             (mod_name, mod) = load_module(mod_path)
+            print("Module %s loaded..." % mod_name)
             mod_dict[mod_name] = mod
 
         # Make dict that maps (mod_name, f_name) --> function handle
         plot_map = {}
         for mod_name in mod_dict.keys():
-            f_dict = get_functions(mod)
+            print("MODULE: %s" % mod_name)
+            fcn_dict = get_functions(mod_dict[mod_name])
     
-            for f_name in f_dict.keys():
-                plot_map[(mod_name, f_name)] = f_dict[f_name]
+            for fcn_name in fcn_dict.keys():
+                print("\t FCN: %s" %fcn_name)
+                plot_map[(mod_name, fcn_name)] = fcn_dict[fcn_name]
             print plot_map
         self.plot_map = plot_map
+
+        print("Plot Map:")
+        print self.plot_map
 
         self.update_plot_tree()
 
@@ -193,13 +231,19 @@ class Isoplot_App(QtGui.QMainWindow):
         data_tree.clear()
 
         mod_names = []
+        parents = {}
         for (mod_name, fcn_name) in self.plot_map.keys():
             if mod_name not in mod_names:
                 parent = QtGui.QTreeWidgetItem(data_tree.invisibleRootItem(), [mod_name])
                 parent.setChildIndicatorPolicy(QtGui.QTreeWidgetItem.ShowIndicator)
                 parent.setExpanded (True)
-                mod_names.append(mod_name)
 
+                parents[mod_name] = parent
+                
+                mod_names.append(mod_name)
+            else:
+                parent = parents[mod_name]
+            print parent, fcn_name
             item = QtGui.QTreeWidgetItem(parent, [fcn_name])
 
     def run_loadfcn(self, mod_name, fcn_name):

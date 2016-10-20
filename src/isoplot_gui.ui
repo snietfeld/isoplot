@@ -123,7 +123,9 @@
      <string>Settings</string>
     </property>
     <addaction name="actionSet_default_directory"/>
-    <addaction name="actionAdd_plotting_library"/>
+    <addaction name="actionAdd_plotting_module"/>
+    <addaction name="actionAdd_loading_module"/>
+    <addaction name="actionReset_User_Settings"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuSettings"/>
@@ -139,9 +141,19 @@
     <string>Set default directory</string>
    </property>
   </action>
-  <action name="actionAdd_plotting_library">
+  <action name="actionAdd_plotting_module">
    <property name="text">
-    <string>Add plotting library</string>
+    <string>Add plotting module</string>
+   </property>
+  </action>
+  <action name="actionReset_User_Settings">
+   <property name="text">
+    <string>Reset User Settings</string>
+   </property>
+  </action>
+  <action name="actionAdd_loading_module">
+   <property name="text">
+    <string>Add loading module</string>
    </property>
   </action>
  </widget>
