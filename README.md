@@ -7,7 +7,9 @@ Data can be loaded by running a function from an imported load module.
 # Plot Modules
 Data can be plotted by running a function from an imported plot module.
 
-
+## Windows Install
+ - Install Anaconda
+ - ```conda install pyqt=4```
 
 # Dev Setup
 ```sudo apt-get install python-pip python2.7-dev libxext-dev python-qt4 qt4-dev-tools build-essential pyqt4-dev-tools```
