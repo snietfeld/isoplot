@@ -5,7 +5,7 @@
 # Author: Scott Nietfeld
 # Initial Commit: 2016-10-12
 #
-# Compiling the GUI:  pyuic4 isoplot_gui.ui -o isoplot_gui.py
+# Compiling the GUI:  pyuic5 isoplot_gui.ui -o isoplot_gui.py
 #
 # Config File: On running the first time, a default config file will be created
 #     for storing persistent app information, including:
@@ -18,7 +18,7 @@ import os
 import pickle
 
 import sys
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 from isoplot_gui import Ui_MainWindow
 
 
@@ -70,10 +70,10 @@ def run_usr_function(mod_name, fcn_name):
     pass
 
 
-class Isoplot_App(QtGui.QMainWindow):
+class Isoplot_App(QtWidgets.QMainWindow):
 
     def __init__(self, parent=None):
-        QtGui.QWidget.__init__(self, parent)
+        QtWidgets.QWidget.__init__(self, parent)
         self.ui = Ui_MainWindow()
         self.config_path = os.path.abspath("./config.pkl")
         self.config = None
@@ -85,14 +85,20 @@ class Isoplot_App(QtGui.QMainWindow):
         self.ui.setupUi(self)
         
         # Connect signals to slots
-        QtCore.QObject.connect(self.ui.btn_run_plotfcn, QtCore.SIGNAL("clicked()"),
-                               self.run_plotfcn)
-        QtCore.QObject.connect(self.ui.actionAdd_plotting_module, QtCore.SIGNAL("triggered()"),
-                               self.add_plotmod)
-        QtCore.QObject.connect(self.ui.actionAdd_loading_module, QtCore.SIGNAL("triggered()"),
-                               self.add_loadmod)
-        QtCore.QObject.connect(self.ui.actionReset_User_Settings, QtCore.SIGNAL("triggered()"),
-                               self.reset_user_settings)
+        self.ui.btn_run_plotfcn.clicked.connect(self.run_plotfcn)
+        self.ui.actionAdd_plotting_module.triggered.connect(self.add_plotmod)
+        self.ui.actionAdd_loading_module.triggered.connect(self.add_loadmod)
+        self.ui.actionReset_User_Settings.triggered.connect(self.reset_user_settings)
+
+        
+        #QtCore.QObject.connect(self.ui.btn_run_plotfcn, QtCore.SIGNAL("clicked()"),
+        #                       self.run_plotfcn)
+        #QtCore.QObject.connect(self.ui.actionAdd_plotting_module, QtCore.SIGNAL("triggered()"),
+        #                       self.add_plotmod)
+        #QtCore.QObject.connect(self.ui.actionAdd_loading_module, QtCore.SIGNAL("triggered()"),
+        #                       self.add_loadmod)
+        #QtCore.QObject.connect(self.ui.actionReset_User_Settings, QtCore.SIGNAL("triggered()"),
+        #                       self.reset_user_settings)
         
         
         self.load_config(self.config_path)
@@ -159,12 +165,14 @@ class Isoplot_App(QtGui.QMainWindow):
             fcn_handle = self.load_map[(mod_name, fcn_name)]
 
             # Now create a lambda that calls the run_loadfcn with right args
-            QtCore.QObject.connect(action,QtCore.SIGNAL("triggered()"),
-                                   lambda : self.run_loadfcn(mod_name, fcn_name))
+            action.triggered.connect(lambda : self.run_loadfcn(mod_name, fcn_name))
+            #QtCore.QObject.connect(action,QtCore.SIGNAL("triggered()"),
+            #                       lambda : self.run_loadfcn(mod_name, fcn_name))
 
         self.ui.menuFile.addSeparator()
         quit_action = self.ui.menuFile.addAction('Quit')
-        QtCore.QObject.connect(quit_action,QtCore.SIGNAL("triggered()"), self.quit)
+        quit_action.triggered.connect(self.quit)
+        #QtCore.QObject.connect(quit_action,QtCore.SIGNAL("triggered()"), self.quit)
 
     def update_data_tree(self):
         data_tree = self.ui.data_treeWidget
@@ -172,13 +180,13 @@ class Isoplot_App(QtGui.QMainWindow):
         
         for data_name in self.open_datasets.keys():
             
-            parent = QtGui.QTreeWidgetItem(data_tree.invisibleRootItem(), [data_name])
-            parent.setChildIndicatorPolicy(QtGui.QTreeWidgetItem.ShowIndicator)
+            parent = QtWidgets.QTreeWidgetItem(data_tree.invisibleRootItem(), [data_name])
+            parent.setChildIndicatorPolicy(QtWidgets.QTreeWidgetItem.ShowIndicator)
             parent.setExpanded (True)
 
             data = self.open_datasets[data_name]
             for key in data.keys():
-                item = QtGui.QTreeWidgetItem(parent, [key])
+                item = QtWidgets.QTreeWidgetItem(parent, [key])
 
     def add_plotmod(self):
         path = str( QtGui.QFileDialog.getOpenFileName(None,
@@ -191,9 +199,9 @@ class Isoplot_App(QtGui.QMainWindow):
         self.import_plotmods()
 
     def add_loadmod(self):
-        path = str( QtGui.QFileDialog.getOpenFileName(None,
-                                                      "Select Load .py Module", "",
-                                                      "Python Modules (*.py)") )
+        path = str( QtWidgets.QFileDialog.getOpenFileName(None,
+                                                          "Select Load .py Module", "",
+                                                          "Python Modules (*.py)") )
 
         self.config['loadmod_paths'].append(path)
         save_config(self.config, self.config_path)
@@ -234,8 +242,8 @@ class Isoplot_App(QtGui.QMainWindow):
         parents = {}
         for (mod_name, fcn_name) in self.plot_map.keys():
             if mod_name not in mod_names:
-                parent = QtGui.QTreeWidgetItem(data_tree.invisibleRootItem(), [mod_name])
-                parent.setChildIndicatorPolicy(QtGui.QTreeWidgetItem.ShowIndicator)
+                parent = QtWidgets.QTreeWidgetItem(data_tree.invisibleRootItem(), [mod_name])
+                parent.setChildIndicatorPolicy(QtWidgets.QTreeWidgetItem.ShowIndicator)
                 parent.setExpanded (True)
 
                 parents[mod_name] = parent
@@ -244,7 +252,7 @@ class Isoplot_App(QtGui.QMainWindow):
             else:
                 parent = parents[mod_name]
             print(parent, fcn_name)
-            item = QtGui.QTreeWidgetItem(parent, [fcn_name])
+            item = QtWidgets.QTreeWidgetItem(parent, [fcn_name])
 
     def run_loadfcn(self, mod_name, fcn_name):
         print("Running %s.%s()" % (mod_name, fcn_name))
@@ -345,7 +353,7 @@ def Test():
 
 if __name__=="__main__":
     # Start GUI
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     myapp = Isoplot_App()
     myapp.show()
     sys.exit(app.exec_())

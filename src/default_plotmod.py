@@ -14,8 +14,8 @@ class Derp:
 
 def scatter(fname, data):
     print("Scatter!")
-    print fname
-    print data
+    print(fname)
+    print(data)
 
     fig = plt.figure()
     ax = fig.add_subplot(111)
