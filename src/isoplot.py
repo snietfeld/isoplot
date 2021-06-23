@@ -73,8 +73,8 @@ def run_usr_function(mod_name, fcn_name):
 class Isoplot_App(QtGui.QMainWindow):
 
     def __init__(self, parent=None):
-	QtGui.QWidget.__init__(self, parent)
-	self.ui = Ui_MainWindow()
+        QtGui.QWidget.__init__(self, parent)
+        self.ui = Ui_MainWindow()
         self.config_path = os.path.abspath("./config.pkl")
         self.config = None
         self.load_map = None
@@ -82,10 +82,10 @@ class Isoplot_App(QtGui.QMainWindow):
         self.open_datasets = {}
         self.last_opened_filename = None
         
-	self.ui.setupUi(self)
+        self.ui.setupUi(self)
         
-	# Connect signals to slots
-	QtCore.QObject.connect(self.ui.btn_run_plotfcn, QtCore.SIGNAL("clicked()"),
+        # Connect signals to slots
+        QtCore.QObject.connect(self.ui.btn_run_plotfcn, QtCore.SIGNAL("clicked()"),
                                self.run_plotfcn)
         QtCore.QObject.connect(self.ui.actionAdd_plotting_module, QtCore.SIGNAL("triggered()"),
                                self.add_plotmod)
@@ -118,7 +118,7 @@ class Isoplot_App(QtGui.QMainWindow):
         # Load config file
         print("Loading config file at %s" % path)
         config = load_config(path)
-        print config
+        print(config)
         self.config = config
 
     def import_loadmods(self):
@@ -136,7 +136,7 @@ class Isoplot_App(QtGui.QMainWindow):
     
             for f_name in f_dict.keys():
                 load_map[(mod_name, f_name)] = f_dict[f_name]
-            print load_map
+            print(load_map)
         self.load_map = load_map
 
         self.update_file_menu()
@@ -218,11 +218,11 @@ class Isoplot_App(QtGui.QMainWindow):
             for fcn_name in fcn_dict.keys():
                 print("\t FCN: %s" %fcn_name)
                 plot_map[(mod_name, fcn_name)] = fcn_dict[fcn_name]
-            print plot_map
+            print(plot_map)
         self.plot_map = plot_map
 
         print("Plot Map:")
-        print self.plot_map
+        print(self.plot_map)
 
         self.update_plot_tree()
 
@@ -243,7 +243,7 @@ class Isoplot_App(QtGui.QMainWindow):
                 mod_names.append(mod_name)
             else:
                 parent = parents[mod_name]
-            print parent, fcn_name
+            print(parent, fcn_name)
             item = QtGui.QTreeWidgetItem(parent, [fcn_name])
 
     def run_loadfcn(self, mod_name, fcn_name):
@@ -251,7 +251,7 @@ class Isoplot_App(QtGui.QMainWindow):
         (filename, data) = self.load_map[(mod_name, fcn_name)]()
         self.open_datasets[filename] = data
         self.last_opened_filename = filename
-        print filename, data
+        print(filename, data)
 
         self.update_data_tree()
 
@@ -288,7 +288,7 @@ def Test():
     # Load config file
     print("Loading config file at %s" % config_path)
     config = load_config(config_path)
-    print config
+    print(config)
 
     
     #
@@ -308,7 +308,7 @@ def Test():
 
         for f_name in f_dict.keys():
             load_map[(mod_name, f_name)] = f_dict[f_name]
-        print load_map.keys()
+        print(load_map.keys())
 
         
     #
@@ -328,7 +328,7 @@ def Test():
 
         for f_name in f_dict.keys():
             plot_map[(mod_name, f_name)] = f_dict[f_name]
-        print plot_map.keys()
+        print(plot_map.keys())
 
 
     
@@ -336,7 +336,7 @@ def Test():
     # RUN
     #----------------------------------------------------------------------
     data = load_map[('default_loadmod', 'load_data_file')]('./test.csv')
-    print data
+    print(data)
     
     print("\n\n#\n# RUN\n#" + "-"*70)
     plot_map[('default_plotmod','scatter')](None, None)
